@@ -20,6 +20,11 @@ export class RegistrationForm {
     //register button 
     readonly registerButton : Locator;
 
+    //register form errors
+    readonly emailError : Locator;
+    readonly passwordError: Locator;
+    readonly confirmPasswordError: Locator;
+
     //login button
     readonly loginButton : Locator;
     
@@ -43,9 +48,21 @@ export class RegistrationForm {
         //register button
         this.registerButton = page.locator('data-testid=register-submit-button');
 
+        //register form errors
+        this.emailError = page.locator('data-testid=email-error');
+        this.passwordError = page.locator('data-testid=password-error');
+        this.confirmPasswordError = page.locator('data-testid=confirm-password-error');
+
         //login button
         this.loginButton = page.locator('data-testid=switch-to-login-button');
         
+    }
+
+    async verifyPlaceholders() {
+        await expect(this.fullNameInput).toHaveAttribute('placeholder', registrationFormTerms.placeholderFullName);
+        await expect(this.emailInput).toHaveAttribute('placeholder', registrationFormTerms.placeholderEmail);
+        await expect(this.passwordInput).toHaveAttribute('placeholder', registrationFormTerms.placeholderPassword);
+        await expect(this.confirmPasswordInput).toHaveAttribute('placeholder', registrationFormTerms.placeholderConfirmPassword);
     }
 
     async fillFullName(fullName : string) {
