@@ -1,0 +1,23 @@
+{
+  "name": "finmoreapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anastasia-mishchenko/finmore-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anastasia-mishchenko/finmore-app/issues"
+  },
+  "homepage": "https://github.com/anastasia-mishchenko/finmore-app#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
