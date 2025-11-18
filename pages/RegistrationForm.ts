@@ -21,6 +21,7 @@ export class RegistrationForm {
     readonly registerButton : Locator;
 
     //register form errors
+    readonly fullNameError : Locator;
     readonly emailError : Locator;
     readonly passwordError: Locator;
     readonly confirmPasswordError: Locator;
@@ -49,6 +50,7 @@ export class RegistrationForm {
         this.registerButton = page.locator('data-testid=register-submit-button');
 
         //register form errors
+        this.fullNameError = page.locator('data-testid=name-error');
         this.emailError = page.locator('data-testid=email-error');
         this.passwordError = page.locator('data-testid=password-error');
         this.confirmPasswordError = page.locator('data-testid=confirm-password-error');

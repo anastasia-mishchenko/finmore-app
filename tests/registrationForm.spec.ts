@@ -25,8 +25,8 @@ test.describe("Registration Form validation", () => {
     })
 
     test ("[Registration][Negative] Verify error messages for fields", async () => {
-        await registrationForm.fillFullName(registrationFormTerms.fullName);
         await registrationForm.clickRegisterButton();
+        await expect(registrationForm.fullNameError).toHaveText(registrationFormTerms.fullNameError);
         await expect(registrationForm.emailError).toHaveText(registrationFormTerms.emailError);
         await expect(registrationForm.passwordError).toHaveText(registrationFormTerms.passwordError);
         await expect(registrationForm.confirmPasswordError).toHaveText(registrationFormTerms.confirmPasswordError);

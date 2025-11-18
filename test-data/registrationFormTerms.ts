@@ -16,6 +16,7 @@ export const registrationFormTerms = {
     placeholderPassword : "Мінімум 6 символів",
     placeholderConfirmPassword : "Повторіть пароль",
 
+    fullNameError : "Ім'я обов'язкове",
     emailError : "Email обов'язковий",
     passwordError : "Пароль обов'язковий",
     passwordMinLengthError : "Пароль повинен містити мінімум 6 символів",
