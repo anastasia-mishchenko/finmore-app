@@ -2,11 +2,11 @@ import { test, expect } from "@playwright/test";
 import { RegistrationForm } from "../pages/RegistrationForm";
 import { registrationFormTerms } from "../test-data/registrationFormTerms";
 import { LoginForm } from "../pages/LoginForm";
-import {
-  generateUniqueEmail,
-  generateUkrainianFullName,
-  generatePassword,
-} from "../test-data/randomDataGenerationForRegistration";
+//import {
+//generateUniqueEmail,
+//  generateUkrainianFullName,
+//  generatePassword,
+//} from "../test-data/randomDataGenerationForRegistration";
 import { DashboardPage } from "../pages/DashboardPage";
 import { faker } from "@faker-js/faker";
 
