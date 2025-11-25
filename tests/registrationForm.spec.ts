@@ -8,7 +8,7 @@ import {
   generatePassword,
 } from "../test-data/randomDataGenerationForRegistration";
 import { DashboardPage } from "../pages/DashboardPage";
-//import { faker } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 
 test.describe("Registration Form validation", () => {
   let loginForm: LoginForm;
@@ -75,16 +75,23 @@ test.describe("Registration Form validation", () => {
   });
 
   test("[Registration][Positive] Fill in the form fields", async () => {
-    const email = generateUniqueEmail();
-    const fullName = generateUkrainianFullName();
-    const password = generatePassword();
-    console.log("Email : " + `${email}`);
-    console.log("Full Name : " + `${fullName}`);
-    console.log("Password : " + `${password}`);
+    // const email = generateUniqueEmail();
+    // const fullName = generateUkrainianFullName();
+    // const password = generatePassword();
+    // console.log("Email : " + `${email}`);
+    // console.log("Full Name : " + `${fullName}`);
+    // console.log("Password : " + `${password}`);
+
+    const fakerEmail = faker.internet.email();
+    const fakerFullName = faker.person.fullName();
+    const fakerPassword = faker.internet.password();
+    console.log("Faker Email : " + `${fakerEmail}`);
+    console.log("Faker Full Name : " + `${fakerFullName}`);
+    console.log("Faker Password : " + `${fakerPassword}`);
 
     
 
-    await registrationForm.fillRegistrationForm(fullName, email, password, password, registrationFormTerms.currencyGBP);
+    await registrationForm.fillRegistrationForm(fakerFullName, fakerEmail, fakerPassword, fakerPassword, registrationFormTerms.currencyGBP);
     await dashboardPage.userMenuIsVisible();
   });
 });
