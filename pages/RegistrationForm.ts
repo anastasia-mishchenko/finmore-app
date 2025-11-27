@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "@playwright/test";   
 import { registrationFormTerms } from "../test-data/registrationFormTerms";
+import { clickElement, fillElement, verifyInputIsInvalid, verifyInputValidationMessage, verifyInputValue } from "../utils/globalMethods";
 
 export class RegistrationForm {
     readonly page : Page;
@@ -8,7 +9,9 @@ export class RegistrationForm {
     readonly fullNameInput : Locator;
     readonly emailInput : Locator;
     readonly passwordInput : Locator;
+    readonly showPasswordButton : Locator;
     readonly confirmPasswordInput : Locator;
+    readonly showConfirmPasswordButton : Locator;
 
     //currency select with options
     readonly mainCurrencySelect : Locator;
@@ -32,32 +35,29 @@ export class RegistrationForm {
 
     constructor(page : Page) {
         this.page = page;
-        this.registerForm = page.locator('data-testid=register-form');
-        this.registerTitle = page.locator('data-testid=register-title');
-        this.fullNameInput = page.locator('data-testid=register-name-input');
-        this.emailInput = page.locator('data-testid=register-email-input')
-        this.passwordInput = page.locator('data-testid=register-password-input');
-        this.confirmPasswordInput = page.locator('data-testid=register-confirm-password-input');
+        this.registerForm = page.getByTestId('register-form');
+        this.registerTitle = page.getByTestId('register-title');
+        this.fullNameInput = page.getByTestId('register-name-input');
+        this.emailInput = page.getByTestId('register-email-input');
+        this.passwordInput = page.getByTestId('register-password-input');
+        this.showPasswordButton = page.locator('[data-testid="register-password-input"]').locator('..').locator('..').getByTestId('toggle-password-visibility').first();
+        this.confirmPasswordInput = page.getByTestId('register-confirm-password-input');
+        this.showConfirmPasswordButton = page.locator('[data-testid="register-confirm-password-input"]').locator('..').locator('..').getByTestId('toggle-password-visibility').first();
 
-        //currency select with options
-        this.mainCurrencySelect = page.locator('data-testid=register-currency-select');
-        this.currencyUAH = page.locator('data-testid=curency-option-UAH');
-        this.currencyUSD = page.locator('data-testid=curency-option-USD');
-        this.currencyEUR = page.locator('data-testid=curency-option-EUR');
-        this.currencyGBP = page.locator('data-testid=curency-option-GBP');
+        this.mainCurrencySelect = page.getByTestId('register-currency-select');
+        this.currencyUAH = page.getByTestId('curency-option-UAH');
+        this.currencyUSD = page.getByTestId('curency-option-USD');
+        this.currencyEUR = page.getByTestId('curency-option-EUR');
+        this.currencyGBP = page.getByTestId('curency-option-GBP');
 
-        //register button
-        this.registerButton = page.locator('data-testid=register-submit-button');
+        this.registerButton = page.getByTestId('register-submit-button');
 
-        //register form errors
-        this.fullNameError = page.locator('data-testid=name-error');
-        this.emailError = page.locator('data-testid=email-error');
-        this.passwordError = page.locator('data-testid=password-error');
-        this.confirmPasswordError = page.locator('data-testid=confirm-password-error');
+        this.fullNameError = page.getByTestId('name-error');
+        this.emailError = page.getByTestId('email-error');
+        this.passwordError = page.getByTestId('password-error');
+        this.confirmPasswordError = page.getByTestId('confirm-password-error');
 
-        //login button
-        this.loginButton = page.locator('data-testid=switch-to-login-button');
-        
+        this.loginButton = page.getByTestId('switch-to-login-button');
     }
 
     async verifyPlaceholders() {
@@ -68,19 +68,23 @@ export class RegistrationForm {
     }
 
     async fillFullName(fullName : string) {
-        await this.fullNameInput.fill(fullName);
+        await fillElement(this.fullNameInput, fullName, 'Full name input');
+        await verifyInputValue(this.fullNameInput, fullName, 'Full name input');
     }
 
     async fillEmail(email : string) {
-        await this.emailInput.fill(email);
+        await fillElement(this.emailInput, email, 'Email input');
+        await verifyInputValue(this.emailInput, email, 'Email input');
     }
 
     async fillPassword(password : string) {
-        await this.passwordInput.fill(password);
+        await fillElement(this.passwordInput, password, 'Password input');
+        await verifyInputValue(this.passwordInput, password, 'Password input');
     }
 
     async fillConfirmPassword(confirmPassword : string) {
-        await this.confirmPasswordInput.fill(confirmPassword);
+        await fillElement(this.confirmPasswordInput, confirmPassword, 'Confirm password input');
+        await verifyInputValue(this.confirmPasswordInput, confirmPassword, 'Confirm password input');
     }
 
     async selectMainCurrency(currency : string) {
@@ -88,20 +92,52 @@ export class RegistrationForm {
     }
 
     async clickRegisterButton() {
-        await this.registerButton.click();
+        await clickElement(this.registerButton, 'Register button');
     }
 
     async clickLoginButton() {
-        await this.loginButton.click();
+        await clickElement(this.loginButton, 'Login button');
     }
 
     async fillRegistrationForm(fullName : string, email : string, password : string, confirmPassword : string, currency : string) {
-        await this.fillFullName(fullName);
-        await this.fillEmail(email);
-        await this.fillPassword(password);
-        await this.fillConfirmPassword(confirmPassword);
-        await this.selectMainCurrency(currency);
-        await this.clickRegisterButton();
+        await fillElement(this.fullNameInput, fullName, 'Full name input');
+        await fillElement(this.emailInput, email, 'Email input');
+        await fillElement(this.passwordInput, password, 'Password input');
+        await fillElement(this.confirmPasswordInput, confirmPassword, 'Confirm password input');
+        await this.mainCurrencySelect.selectOption(currency);
+        await clickElement(this.registerButton, 'Register button');
+    }
+
+    async clickShowPasswordButton() {
+        await clickElement(this.showPasswordButton, 'Show password button');
+    }
+
+    async clickShowConfirmPasswordButton() {
+        await clickElement(this.showConfirmPasswordButton, 'Show confirm password button');
+    }
+
+    async verifyPasswordIsVisible() {
+        await expect(this.passwordInput).toHaveAttribute('type', 'text');
+    }
+
+    async verifyPasswordIsHidden() {
+        await expect(this.passwordInput).toHaveAttribute('type', 'password');
+    }
+
+    async verifyConfirmPasswordIsVisible() {
+        await expect(this.confirmPasswordInput).toHaveAttribute('type', 'text');
+    }
+
+    async verifyConfirmPasswordIsHidden() {
+        await expect(this.confirmPasswordInput).toHaveAttribute('type', 'password');
+    }
+
+    async verifyEmailInputIsInvalid() {
+        await verifyInputIsInvalid(this.emailInput, 'Email input');
+    }
+
+    async verifyEmailValidationMessage() {
+        await verifyInputValidationMessage(this.emailInput, 'Email input');
     }
 
 }

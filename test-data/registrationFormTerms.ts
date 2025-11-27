@@ -18,8 +18,10 @@ export const registrationFormTerms = {
 
     fullNameError : "Ім'я обов'язкове",
     emailError : "Email обов'язковий",
+    invalidEmailError : "Email обов'язковий",
     passwordError : "Пароль обов'язковий",
     passwordMinLengthError : "Пароль повинен містити мінімум 6 символів",
     confirmPasswordError : "Підтвердження паролю обов'язкове",
     confirmPasswordMatchError : "Паролі не співпадають",
+    invalidEmail : "invalid-email",
 }

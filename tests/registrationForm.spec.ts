@@ -13,7 +13,7 @@ import { faker } from "@faker-js/faker";
 test.describe("Registration Form validation", () => {
   let loginForm: LoginForm;
   let registrationForm: RegistrationForm;
-  let dashboardPage : DashboardPage;
+  let dashboardPage: DashboardPage;
 
   test.beforeEach(async ({ page }) => {
     loginForm = new LoginForm(page);
@@ -37,18 +37,10 @@ test.describe("Registration Form validation", () => {
 
   test("[Registration][Negative] Verify error messages for fields", async () => {
     await registrationForm.clickRegisterButton();
-    await expect(registrationForm.fullNameError).toHaveText(
-      registrationFormTerms.fullNameError
-    );
-    await expect(registrationForm.emailError).toHaveText(
-      registrationFormTerms.emailError
-    );
-    await expect(registrationForm.passwordError).toHaveText(
-      registrationFormTerms.passwordError
-    );
-    await expect(registrationForm.confirmPasswordError).toHaveText(
-      registrationFormTerms.confirmPasswordError
-    );
+    await expect(registrationForm.fullNameError).toHaveText(registrationFormTerms.fullNameError);
+    await expect(registrationForm.emailError).toHaveText(registrationFormTerms.emailError);
+    await expect(registrationForm.passwordError).toHaveText(registrationFormTerms.passwordError);
+    await expect(registrationForm.confirmPasswordError).toHaveText(registrationFormTerms.confirmPasswordError);
   });
 
   test("[Registration][Negative] Verify error message for password min length", async () => {
@@ -56,22 +48,16 @@ test.describe("Registration Form validation", () => {
     await registrationForm.fillEmail(registrationFormTerms.email);
     await registrationForm.fillPassword(registrationFormTerms.passwordShort);
     await registrationForm.clickRegisterButton();
-    await expect(registrationForm.passwordError).toHaveText(
-      registrationFormTerms.passwordMinLengthError
-    );
+    await expect(registrationForm.passwordError).toHaveText(registrationFormTerms.passwordMinLengthError);
   });
 
   test("[Registration][Negative] Verify error message for confirm password match", async () => {
     await registrationForm.fillFullName(registrationFormTerms.fullName);
     await registrationForm.fillEmail(registrationFormTerms.email);
     await registrationForm.fillPassword(registrationFormTerms.password);
-    await registrationForm.fillConfirmPassword(
-      registrationFormTerms.passwordShort
-    );
+    await registrationForm.fillConfirmPassword(registrationFormTerms.passwordShort);
     await registrationForm.clickRegisterButton();
-    await expect(registrationForm.confirmPasswordError).toHaveText(
-      registrationFormTerms.confirmPasswordMatchError
-    );
+    await expect(registrationForm.confirmPasswordError).toHaveText(registrationFormTerms.confirmPasswordMatchError);
   });
 
   test("[Registration][Positive] Fill in the form fields", async () => {
@@ -89,13 +75,58 @@ test.describe("Registration Form validation", () => {
     console.log("Faker Full Name : " + `${fakerFullName}`);
     console.log("Faker Password : " + `${fakerPassword}`);
 
-    
-
-    await registrationForm.fillRegistrationForm(fakerFullName, fakerEmail, fakerPassword, fakerPassword, registrationFormTerms.currencyGBP);
+    await registrationForm.fillRegistrationForm(
+      fakerFullName, 
+      fakerEmail, 
+      fakerPassword, 
+      fakerPassword, 
+      registrationFormTerms.currencyGBP
+    );
     await dashboardPage.userMenuIsVisible();
+  });
+
+  test("[Registration][Positive] Show/Hide password button functionality", async () => {
+    await registrationForm.fillPassword(registrationFormTerms.password);
+    await registrationForm.verifyPasswordIsHidden();
+    await registrationForm.clickShowPasswordButton();
+    await registrationForm.verifyPasswordIsVisible();
+    await registrationForm.clickShowPasswordButton();
+    await registrationForm.verifyPasswordIsHidden();
+  });
+
+  test("[Registration][Positive] Switch back to login form", async () => {
+    await registrationForm.clickLoginButton();
+    await expect(loginForm.loginForm).toBeVisible();
+  });
+
+  test("[Registration][Negative] Verify error message for invalid email format", async () => {
+    await registrationForm.fillFullName(registrationFormTerms.fullName);
+    await registrationForm.fillEmail(registrationFormTerms.invalidEmail);
+    await registrationForm.fillPassword(registrationFormTerms.password);
+    await registrationForm.fillConfirmPassword(registrationFormTerms.password);
+    await registrationForm.clickRegisterButton();
+    await registrationForm.verifyEmailInputIsInvalid();
+    await registrationForm.verifyEmailValidationMessage();
+  });
+
+  test("[Registration][Positive] Select UAH currency", async () => {
+    await registrationForm.selectMainCurrency(registrationFormTerms.currencyUAH);
+    await expect(registrationForm.mainCurrencySelect).toHaveValue(registrationFormTerms.currencyUAH);
+  });
+
+  test("[Registration][Positive] Select USD currency", async () => {
+    await registrationForm.selectMainCurrency(registrationFormTerms.currencyUSD);
+    await expect(registrationForm.mainCurrencySelect).toHaveValue(registrationFormTerms.currencyUSD);
+  });
+
+  test("[Registration][Positive] Select EUR currency", async () => {
+    await registrationForm.selectMainCurrency(registrationFormTerms.currencyEUR);
+    await expect(registrationForm.mainCurrencySelect).toHaveValue(registrationFormTerms.currencyEUR);
+  });
+
+  test("[Registration][Positive] Select GBP currency", async () => {
+    await registrationForm.selectMainCurrency(registrationFormTerms.currencyGBP);
+    await expect(registrationForm.mainCurrencySelect).toHaveValue(registrationFormTerms.currencyGBP);
   });
 });
 
-// FAKER підключити
-// транзакції
-// login

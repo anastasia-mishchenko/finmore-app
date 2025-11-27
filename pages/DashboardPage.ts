@@ -8,7 +8,7 @@ export class DashboardPage {
 
     constructor(page : Page){
         this.page = page;
-        this.userMenu = page.locator("data-testid=user-menu-trigger");
+        this.userMenu = page.getByTestId('user-menu-trigger');
     }
 
     async userMenuIsVisible(){
