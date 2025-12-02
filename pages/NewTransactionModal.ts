@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { checkVisibility, clickElement, fillElement, verifyInputValue } from "../utils/globalMethods";
+import { checkVisibility, clickElement, fillElement, selectOptionByValue, verifyInputValue } from "../utils/globalMethods";
 
 export class NewTransactionModal {
     readonly page: Page;
@@ -95,22 +95,30 @@ export class NewTransactionModal {
         await fillElement(this.amountInput, amount, 'Amount input');
     }
 
-    async selectCategory(category: string) {
-        await this.categorySelect.selectOption(category);
+    async selectExpenseCategory(category: 'Продукти' | 'Транспорт' | 'Розваги' | 'Комунальні' | 'Здоров\'я') {
+        await selectOptionByValue(this.categorySelect, category, 'Category select');
+        await expect(this.categorySelect).toHaveValue(category);
+    }
+
+    async selectIncomeCategory(category: 'Зарплата' | 'Фриланс' | 'Інвестиції') {
+        await selectOptionByValue(this.categorySelect, category, 'Category select');
+        await expect(this.categorySelect).toHaveValue(category);
     }
 
     async fillDescription(description: string) {
         await fillElement(this.descriptionInput, description, 'Description input');
+        await expect(this.descriptionInput).toHaveValue(description);
     }
 
     async fillDate(date: string) {
         await fillElement(this.dateInput, date, 'Date input');
+        await expect(this.dateInput).toHaveValue(date);
     }
 
-    async selectAccount(account: string) {
-        await this.accountSelect.selectOption(account);
+    async selectAccount(account: 'Готівка' | 'Картка ПриватБанку' | 'Картка Монобанку' | 'Ощадний рахунок') {
+        await selectOptionByValue(this.accountSelect, account, 'Account select');
+        await expect(this.accountSelect).toHaveValue(account);
     }
-
     async fillTag(tag: string) {
         await fillElement(this.tagsInput, tag, 'Tags input');
     }
@@ -178,25 +186,32 @@ export class NewTransactionModal {
         await clickElement(this.createButton, 'Create button');
     }
 
+    async clickSaveButton() {
+        await clickElement(this.createButton, 'Save button');
+    }
+
     async clickCloseButton() {
         await clickElement(this.closeButton, 'Close button');
     }
 
     async fillTransactionForm(
-        type: 'expense' | 'income',
+        type: 'Витрата' | 'Дохід',
         amount: string,
-        category: string,
+        category: 'Продукти' | 'Транспорт' | 'Розваги' | 'Комунальні' | 'Здоров\'я' | 'Зарплата' | 'Фриланс' | 'Інвестиції',
         description: string,
         date: string,
-        account: string
+        account: 'Готівка' | 'Картка ПриватБанку' | 'Картка Монобанку' | 'Ощадний рахунок'
     ) {
-        if (type === 'expense') {
+        if (type === 'Витрата') {
             await this.selectExpenseType();
-        } else {
+            await this.selectExpenseCategory(category as 'Продукти' | 'Транспорт' | 'Розваги' | 'Комунальні' | 'Здоров\'я');
+        } else if (type === 'Дохід') {
             await this.selectIncomeType();
+            await this.selectIncomeCategory(category as 'Зарплата' | 'Фриланс' | 'Інвестиції');
+        } else {
+            throw new Error(`Invalid transaction type: ${type}`);
         }
         await this.fillAmount(amount);
-        await this.selectCategory(category);
         await this.fillDescription(description);
         await this.fillDate(date);
         await this.selectAccount(account);
