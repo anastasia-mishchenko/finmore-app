@@ -1,5 +1,5 @@
 import { Locator, Page, expect } from "@playwright/test";
-import { checkVisibility } from "../utils/globalMethods";
+import { checkVisibility, clickElement, verifyInputValue, verifyTextContent } from "../utils/globalMethods";
 
 export class DashboardPage {
     readonly page : Page;
@@ -20,9 +20,13 @@ export class DashboardPage {
     readonly navAnalytics: Locator;
     readonly navSettings: Locator;
     readonly totalIncomeCard: Locator;
-    readonly totalExpencesCard: Locator;
+    readonly totalIncomeAmount: Locator;
+    readonly totalExpensesCard: Locator;
+    readonly totalExpensesAmount: Locator;
     readonly balanceCard: Locator;
+    readonly balanceAmount: Locator;
     readonly budgetUsedCard: Locator;
+    readonly budgetUsedAmount: Locator;
     readonly recentTransactionsWidget: Locator;
     readonly budgetOverviewWidget: Locator;
 
@@ -44,15 +48,51 @@ export class DashboardPage {
         this.navAnalytics = page.getByTestId('nav-analytics');
         this.navSettings = page.getByTestId('nav-settings');
         this.totalIncomeCard = page.getByTestId('total-income-card');
-        this.totalExpencesCard = page.getByTestId('total-expences-card');
+        this.totalIncomeAmount = page.getByTestId('total-income-card-value');
+        this.totalExpensesCard = page.getByTestId('total-expenses-card');
+        this.totalExpensesAmount = page.getByTestId('total-expenses-card-value');
         this.balanceCard = page.getByTestId('balance-card');
+        this.balanceAmount = page.getByTestId('balance-card-value');
         this.budgetUsedCard = page.getByTestId('budget-used-card');
+        this.budgetUsedAmount = page.getByTestId('budget-used-card-value');
         this.recentTransactionsWidget = page.getByTestId('recent-transactions-widget');
         this.budgetOverviewWidget = page.getByTestId('budget-overview-widget');
     }
 
     async userMenuIsVisible(){
          await checkVisibility(this.userMenu, 'User menu');
+    }
+
+    async navigateToTransactionsPage(){
+        await clickElement(this.navTransactions, 'Navigate to transactions page');
+    }
+
+    async navigateToCategoriesPage(){
+        await clickElement(this.navCategories, 'Navigate to categories page');
+    }
+
+    async navigateToBudgetsPage(){
+        await clickElement(this.navBudgets, 'Navigate to budgets page');
+    }
+
+    async navigateToAccountsPage(){
+        await clickElement(this.navAccounts, 'Navigate to accounts page');
+    }
+
+    async navigateToReportsPage(){
+        await clickElement(this.navReports, 'Navigate to reports page');
+    }
+
+    async navigateToAnalyticsPage(){
+        await clickElement(this.navAnalytics, 'Navigate to analytics page');
+    }
+
+    async navigateToSettingsPage(){
+        await clickElement(this.navSettings, 'Navigate to settings page');
+    }
+
+    async clickAddTransactionButton(){
+        await clickElement(this.addTransactionButton, 'Add transaction button');
     }
 
     async verifyTheLastTransaction(amount: string, category: string, description: string) {
@@ -65,7 +105,7 @@ export class DashboardPage {
         }
         
         // Get the last transaction (most recent)
-        const lastTransaction = allTransactions.nth(count - 1);
+        const lastTransaction = allTransactions.first();
         
         // Verify description (first p with font-medium class)
         const descriptionElement = lastTransaction.locator('p.font-medium').first();
@@ -79,6 +119,19 @@ export class DashboardPage {
         const amountElement = lastTransaction.locator('p.font-bold').first();
         const amountText = await amountElement.textContent();
         expect(amountText).toContain(amount);
+    }
+
+    async verifyTotalIncome(amount: string) {
+        await verifyTextContent(this.totalIncomeAmount, amount, 'Total income amount');
+    }
+    async verifyTotalExpenses(amount: string) {
+        await verifyTextContent(this.totalExpensesAmount, amount, 'Total expenses amount');
+    }
+    async verifyBalance(amount: string) {
+        await verifyTextContent(this.balanceAmount, amount, 'Balance amount');
+    }
+    async verifyBudgetUsed(amount: string) {
+        await verifyTextContent(this.budgetUsedAmount, amount, 'Budget used amount');
     }
 
 
