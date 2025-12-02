@@ -4,8 +4,8 @@ import { RegistrationForm } from '../pages/RegistrationForm';
 import { LoginForm } from '../pages/LoginForm';
 import { faker } from '@faker-js/faker';
 import { registrationFormTerms } from '../test-data/registrationFormTerms';
-import { checkVisibility, clickElement, fillElement } from '../utils/globalMethods';
 import { NewTransactionModal } from '../pages/NewTransactionModal';
+import * as allure from "allure-js-commons";
 
 test.describe("Dashboard Page validation", () => {
     let dashboardPage: DashboardPage;
@@ -39,7 +39,7 @@ test.describe("Dashboard Page validation", () => {
       fakerEmail,
       fakerPassword,
       fakerPassword,
-      registrationFormTerms.currencyGBP
+      registrationFormTerms.currencyUAH
     );
  
     //await loginForm.fillLoginForm(fakerEmail, fakerPassword);
@@ -47,22 +47,94 @@ test.describe("Dashboard Page validation", () => {
  
   });
  
-  test("[Positive] Add expense transaction", async()=>{
-    await clickElement(dashboardPage.addTransactionButton, 'Додати транзакцію');
-    await newTransactionModal.modalIsVisible();
-    await clickElement(newTransactionModal.expenseTypeButton, 'Витрата');
-    await fillElement(newTransactionModal.amountInput, '1000', 'Сума');
-    await newTransactionModal.selectCategory('Продукти');
-    await fillElement(newTransactionModal.descriptionInput, 'Вино', 'Опис');
-    await fillElement(newTransactionModal.dateInput, '2025-11-26', 'Дата');
-    await newTransactionModal.selectAccount('Картка Монобанку');
-    await newTransactionModal.fillTag('Алкоголь');
-    await clickElement(newTransactionModal.addTagButton, 'Додати тег');
-    await newTransactionModal.verifyTagExists('Алкоголь');
-    
-    
-    await clickElement(newTransactionModal.createButton, 'Створити');
-    await newTransactionModal.modalIsNotVisible();
-    await dashboardPage.verifyTheLastTransaction('1000', 'Продукти', 'Вино');
+  test("[Positive] Verify total income ampount is correct", async()=>{
+    await allure.displayName("Verify total income amount");
+    await allure.description("This test verifies correctness of calculating total income");
+    await allure.severity("critical");
+
+    await allure.step("Add income transaction", async()=>{
+        await dashboardPage.clickAddTransactionButton();
+        await newTransactionModal.fillTransactionForm('Дохід','15000', 'Інвестиції','Продаж акцій','2025-12-02', 'Картка ПриватБанку');
+        await newTransactionModal.clickCreateButton();
+        await newTransactionModal.modalIsNotVisible();
+        await allure.step("Verify transaction exists", async()=>{
+            await dashboardPage.verifyTheLastTransaction('15000', 'Інвестиції', 'Продаж акцій');
+        });
+    });
+
+    await allure.step("Add income transaction", async()=>{
+        await dashboardPage.clickAddTransactionButton();
+        await newTransactionModal.fillTransactionForm('Дохід','5000', 'Фриланс','Проект','2025-12-02', 'Картка ПриватБанку');
+        await newTransactionModal.clickCreateButton();
+        await newTransactionModal.modalIsNotVisible();
+        await allure.step("Verify transaction exists", async()=>{
+            await dashboardPage.verifyTheLastTransaction('5000', 'Фриланс', 'Проект');
+        });    
+
+    await allure.step("Verify total income amount is correct", async()=>{
+        await dashboardPage.verifyTotalIncome('20000.00 UAH');
+    });
+    });
   });
+
+test ("[Positive] Verify total expences amount is correct", async()=>{
+    await allure.displayName("Verify total expenses amount");
+    await allure.description("This test verifies correctens of calculating total expenses");
+    await allure.severity("critical");
+
+    await allure.step("Add expense transaction", async()=>{
+        await dashboardPage.clickAddTransactionButton();
+        await newTransactionModal.fillTransactionForm('Витрата', '500', 'Транспорт', 'Таксі', '2025-12-01', 'Картка Монобанку');
+        await newTransactionModal.clickCreateButton();
+        await newTransactionModal.modalIsNotVisible();
+        await allure.step("Verify transaction exists", async()=>{
+            await dashboardPage.verifyTheLastTransaction('500', 'Транспорт', 'Таксі');
+        });   
+    });
+
+    await allure.step("Add expense transaction", async()=>{
+      await dashboardPage.clickAddTransactionButton();
+      await newTransactionModal.fillTransactionForm('Витрата', '12500', 'Продукти', 'Покупка продуктів', '2025-12-01', 'Картка Монобанку');
+      await newTransactionModal.clickCreateButton();
+      await newTransactionModal.modalIsNotVisible();
+      await allure.step("Verify transaction exists", async()=>{
+          await dashboardPage.verifyTheLastTransaction('12500', 'Продукти', 'Покупка продуктів');
+      });   
+    });
+
+    await allure.step("Verify total expenses amount is correct", async()=>{
+        await dashboardPage.verifyTotalExpenses('13000.00 UAH');
+    });
+});
+
+test ("[Positive] Verify balance amount is correct", async()=>{
+    await allure.displayName("Verify balance amount");
+    await allure.description("This test verifies correctness of calculating balance");
+    await allure.severity("critical");
+    
+  await allure.step("Add income transaction", async()=>{
+    await dashboardPage.clickAddTransactionButton();
+    await newTransactionModal.fillTransactionForm('Дохід','15000', 'Інвестиції','Продаж акцій','2025-12-02', 'Картка ПриватБанку');
+    await newTransactionModal.clickCreateButton();
+    await newTransactionModal.modalIsNotVisible();
+    await allure.step("Verify transaction exists", async()=>{
+        await dashboardPage.verifyTheLastTransaction('15000', 'Інвестиції', 'Продаж акцій');
+    });
+  });
+
+  await allure.step("Add expense transaction", async()=>{
+    await dashboardPage.clickAddTransactionButton();
+    await newTransactionModal.fillTransactionForm('Витрата', '5000', 'Продукти', 'Покупка продуктів', '2025-12-01', 'Картка Монобанку');
+    await newTransactionModal.clickCreateButton();
+    await newTransactionModal.modalIsNotVisible();
+    await allure.step("Verify transaction exists", async()=>{
+        await dashboardPage.verifyTheLastTransaction('5000', 'Продукти', 'Покупка продуктів');
+    });
+  });
+
+  await allure.step("Verify balance amount is correct", async()=>{
+    await dashboardPage.verifyBalance('10000.00 UAH');
+  });
+});
+
 });
