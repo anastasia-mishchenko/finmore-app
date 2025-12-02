@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { LoginForm } from "../pages/LoginForm";
 import { loginFormTerms } from "../test-data/loginTerms";
 import { RegistrationForm } from "../pages/RegistrationForm";
-
+import * as allure from "allure-js-commons";
 test.describe("Login Form validation", () => {
   let loginForm: LoginForm;
   let registrationForm: RegistrationForm;
@@ -15,20 +15,32 @@ test.describe("Login Form validation", () => {
   });
   
   test("[Login][Positive] Verify correct title is shown on Login Form", async () => {
+    await allure.displayName("Verify correct title is shown on Login Form");
+    await allure.description("This test verifies the correct title is shown on the Login Form");
+    await allure.severity("critical");
     await loginForm.verifyTitle(loginFormTerms.loginFormTitle);
   });
 
   test("[Login][Positive] Verify placeholders for fields", async () => {
+    await allure.displayName("Verify placeholders for fields");
+    await allure.description("This test verifies the placeholders for the fields on the Login Form");
+    await allure.severity("medium");
     await loginForm.verifyPlaceholders();
   });
 
   test("[Login][Negative] Verify error messages for empty fields", async () => {
+    await allure.displayName("Verify error messages for empty fields");
+    await allure.description("This test verifies the error messages for the empty fields on the Login Form");
+    await allure.severity("critical");
     await loginForm.clickLoginButton();
     await expect(loginForm.emailError).toHaveText(loginFormTerms.emailError);
     await expect(loginForm.passwordError).toHaveText(loginFormTerms.passwordError);
   });
 
   test("[Login][Negative] Verify error message for invalid email format", async () => {
+    await allure.displayName("Verify error message for invalid email format");
+    await allure.description("This test verifies the error message for the invalid email format on the Login Form");
+    await allure.severity("medium");
     await loginForm.fillEmail(loginFormTerms.invalidEmail);
     await loginForm.fillPassword(loginFormTerms.password);
     await loginForm.verifyEmailInputIsInvalid();
@@ -39,6 +51,9 @@ test.describe("Login Form validation", () => {
   });
 
   test("[Login][Negative] Verify error message for invalid credentials", async () => {
+    await allure.displayName("Verify error message for invalid credentials");
+    await allure.description("This test verifies the error message for the invalid credentials on the Login Form");
+    await allure.severity("critical");
     await loginForm.fillEmail(loginFormTerms.email);
     await loginForm.fillPassword(loginFormTerms.invalidPassword);
     await loginForm.clickLoginButton();
@@ -52,6 +67,9 @@ test.describe("Login Form validation", () => {
   // });
 
   test("[Login][Positive] Fill in the form fields", async () => {
+    await allure.displayName("Fill in the form fields");
+    await allure.description("This test verifies the ability to fill in the form fields on the Login Form");
+    await allure.severity("critical");
     await loginForm.fillEmail(loginFormTerms.email);
     await loginForm.fillPassword(loginFormTerms.password);
     await expect(loginForm.emailInput).toHaveValue(loginFormTerms.email);
@@ -59,6 +77,9 @@ test.describe("Login Form validation", () => {
   });
 
   test("[Login][Positive] Show/Hide password button functionality", async () => {
+    await allure.displayName("Show/Hide password button functionality");
+    await allure.description("This test verifies the ability to show/hide the password button on the Login Form");
+    await allure.severity("medium");
     await loginForm.fillPassword(loginFormTerms.password);
     await loginForm.verifyPasswordIsHidden();
     await loginForm.clickShowPasswordButton();
@@ -68,6 +89,9 @@ test.describe("Login Form validation", () => {
   });
 
   test("[Login][Positive] Switch to registration form", async () => {
+    await allure.displayName("Switch to registration form");
+    await allure.description("This test verifies the ability to switch to the registration form on the Login Form");
+    await allure.severity("critical");
     await loginForm.clickSwitchToRegistrationButton();
     await expect(registrationForm.registerForm).toBeVisible();
   });
