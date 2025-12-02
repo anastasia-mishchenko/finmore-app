@@ -6,6 +6,9 @@ dist/
 .DS_Store
 playwright-report/
 test-results/
+test-results.json
+allure-results/
+allure-report/
 playwright/.cache/
 .playwright-mcp/
 .cursor/
