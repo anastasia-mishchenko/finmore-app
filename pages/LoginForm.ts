@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { checkVisibility, clickElement, fillElement, verifyInputIsInvalid, verifyInputValidationMessage, verifyInputValue } from "../utils/globalMethods";
+import { checkVisibility, clickElement, fillElement, verifyInputIsInvalid, verifyInputValidationMessage, verifyInputValue, verifyTextContent } from "../utils/globalMethods";
 import { loginFormTerms } from "../test-data/loginTerms";
 
 export class LoginForm {
@@ -63,7 +63,7 @@ export class LoginForm {
     }
 
     async verifyTitle(expectedTitle: string) {
-        await verifyInputValue(this.loginTitle, expectedTitle, 'Login title');
+        await verifyTextContent(this.loginTitle, expectedTitle, 'Login title');
     }
 
     async verifyPlaceholders() {
