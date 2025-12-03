@@ -66,6 +66,7 @@ export class TransactionsPage{
             
             // Get the data-testid attribute to extract ID
             const testId = await transaction.getAttribute('data-testid');
+            console.log(testId);
             if (!testId) continue;
             
             // Verify description (h3 with the description text)
@@ -85,6 +86,7 @@ export class TransactionsPage{
             
             // Extract ID from data-testid
             const id = testId.replace('transaction-item-', '');
+            console.log(id);
             return id;
         }
         

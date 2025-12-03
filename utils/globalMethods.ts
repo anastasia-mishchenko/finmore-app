@@ -3,6 +3,9 @@ import { expect, Locator } from "@playwright/test";
 export async function clickElement (locator : Locator, name : string) {
    try {
     console.log(`CLICK: ${name}`);
+    //wait for locator to be visible
+    await locator.waitFor({ state: "visible" });
+    await locator.click({ trial: true });
     await locator.click();
     console.log(`CLICK SUCCESS: ${name}`);
   } catch (error) {
@@ -25,6 +28,7 @@ try {
 export async function checkVisibility (locator : Locator, name : string){
 try {
     console.log(`CHECK VISIBLE: ${name}`);
+    await locator.waitFor({ state: "visible" });
     await expect(locator).toBeVisible();
     console.log(`VISIBLE OK: ${name}`);
   } catch (error) {
