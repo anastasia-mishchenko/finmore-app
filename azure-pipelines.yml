@@ -3,6 +3,7 @@ jobs:
   - job: Build
     pool: Anastasiia Pool
     steps:
+      - checkout: self
       - task: PowerShell@2
         enabled: true
         displayName: "Install dependencies"
