@@ -1,3 +1,4 @@
+import { fa } from '@faker-js/faker/.';
 import { defineConfig, devices } from '@playwright/test';
 /**
  * Read environment variables from file.
@@ -28,6 +29,8 @@ export default defineConfig({
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    actionTimeout: 1000,
+    headless: false,
     /* Base URL to use in actions like `await page.goto('/')`. */
      baseURL: 'https://finmore.netlify.app/',
      screenshot: 'only-on-failure',

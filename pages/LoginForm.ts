@@ -2,6 +2,7 @@ import { expect, Locator, Page } from "@playwright/test";
 import { checkVisibility, clickElement, fillElement, verifyInputIsInvalid, verifyInputValidationMessage, verifyInputValue, verifyTextContent } from "../utils/globalMethods";
 import { loginFormTerms } from "../test-data/loginTerms";
 
+
 export class LoginForm {
     readonly page : Page;
     readonly loginForm : Locator;
