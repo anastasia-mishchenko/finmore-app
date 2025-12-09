@@ -30,7 +30,7 @@ jobs:
           scriptType: 'pscore'
           scriptLocation: 'inlineScript'
           inlineScript: |
-            npx playwright test --reporter=list --reporter=allure-playwright --output=playwright-report
+            npx playwright test --config=playwright.service.config.ts --reporter=html --output=playwright-report
           addSpnToEnvironment: true
 
       # 5. Публікація артефактів
