@@ -3,7 +3,10 @@ jobs:
   - job: Build
     pool: Anastasiia Pool
     steps:
+      # 1. Checkout коду
       - checkout: self
+
+      # 2. Встановлення залежностей
       - task: PowerShell@2
         enabled: true
         displayName: "Install dependencies"
@@ -11,25 +14,29 @@ jobs:
           targetType: 'inline'
           script: 'npm ci'
           workingDirectory: tests/ # update accordingly
- 
+
+      # 3. Створити папку для звітів (щоб PublishPipelineArtifact не падав)
+      - script: mkdir -p playwright-report
+        displayName: "Create report folder"
+
+      # 4. Запуск Playwright тестів
       - task: AzureCLI@2
-        displayName: Run Playwright Test
+        displayName: "Run Playwright Test"
         env:
           PLAYWRIGHT_SERVICE_URL: $(PLAYWRIGHT_SERVICE_URL)
-          PLAYWRIGHT_SERVICE_RUN_ID: $(Build.DefinitionName) - $(Build.BuildNumber) - $(System.JobAttempt)
+          PLAYWRIGHT_SERVICE_RUN_ID: $(Build.DefinitionName)-$(Build.BuildNumber)-$(System.JobAttempt)
         inputs:
-          azureSubscription: 'playwrightTest' # Service connection used to authenticate this pipeline with Azure to use the service
+          azureSubscription: 'playwrightTest'
           scriptType: 'pscore'
           scriptLocation: 'inlineScript'
           inlineScript: |
-            npx playwright test  --config=playwright.service.config.ts           
+            npx playwright test --config=playwright.service.config.ts --reporter=html --output=playwright-report
           addSpnToEnvironment: true
-          
- 
+
+      # 5. Публікація артефактів
       - task: PublishPipelineArtifact@1
-        displayName: Upload Playwright report
+        displayName: "Upload Playwright report"
         inputs:
-          targetPath: playwright-report/ # update accordingly
+          targetPath: playwright-report/   # шлях до створеної папки
           artifact: 'Playwright tests'
           publishLocation: 'pipeline'
- 
