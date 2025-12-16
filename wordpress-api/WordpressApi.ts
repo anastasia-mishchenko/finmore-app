@@ -173,24 +173,18 @@ export class WordPressAPI {
     }
   }
  
-  // Permanently delete post (true delete)
   async permanentlyDeletePost(postId: number): Promise<APIResponse> {
     try {
-      // Check if post exists and its status
       const getResponse = await this.getPost(postId);
       
       if (getResponse.ok()) {
         const post = await getResponse.json();
-        // If post is not in trash, move it to trash first
         if (post.status !== 'trash') {
           await this.deletePost(postId, false);
         }
       } else {
-        // If post doesn't exist, try to delete anyway (might already be deleted)
-        // This handles edge cases
       }
       
-      // Now permanently delete (force delete)
       const response = await this.deletePost(postId, true);
       console.log('Permanently Delete Post Status:', response.status());
       return response;

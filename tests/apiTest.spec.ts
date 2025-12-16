@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { WordPressAPI, PostData } from '../wordpress-api/WordpressApi';
 import { apiTestTerms } from '../test-data/apiTestTerms';
+import { validateDate } from '../utils/validateDateAPI';
+import { validateURL } from '../utils/validateUrlAPI';
 
 const BASE_URL = apiTestTerms.baseUrl;
 const USERNAME = process.env.WP_USERNAME || apiTestTerms.defaultUsername;
@@ -44,6 +46,16 @@ test.describe.serial('WordPress REST API CRUD Operations', () => {
     expect(post.id).toBeDefined();
     expect(post.title.rendered).toEqual(postData.title);
     expect(post.status).toBe(apiTestTerms.status.draft);
+    expect(validateDate(post.date)).toBeDefined();
+    expect(validateURL(post.link)).toBeDefined();
+    expect(validateURL(post.guid.rendered)).toBeDefined();
+    expect(validateURL(post.guid.raw)).toBeDefined();
+    expect(post.content.protected).toBe(false);
+    expect(post.sticky).toBe(false);
+    const categories = post.categories;
+    expect(categories.length).toBeGreaterThan(0);
+    const classList = post.class_list;
+    expect(classList[0]).toBe(`post-${createdPostId}`);
   });
 
   test('check that status set to draft after creation', async () => {
@@ -89,12 +101,13 @@ test.describe.serial('WordPress REST API CRUD Operations', () => {
     const isoFutureDate = futureDate.toISOString();
 
     const response = await wpApi.updatePost(createdPostId, {
-      date: isoFutureDate,
+      date: validateDate(isoFutureDate),
     });
     expect(response.ok()).toBeTruthy();
 
     const updatedPost = await response.json();
     expect(updatedPost.status).toBe(apiTestTerms.status.future);
+    expect(validateDate(updatedPost.date)).toBeDefined();
   });
  
   test('should retrieve all posts', async () => {

@@ -9,7 +9,7 @@ import { NewTransactionModal } from '../pages/NewTransactionModal';
 import * as allure from "allure-js-commons";
  
 test.describe("Dashboard Page validation", () => {
- 
+  
   test.beforeEach(async ({ page }) => {
     const registrationForm = new RegistrationForm(page);
     const loginForm = new LoginForm(page);

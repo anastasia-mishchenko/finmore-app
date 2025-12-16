@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import { WordPressAPI, PostData } from '../wordpress-api/WordpressApi';
+import { WordPressAPI, PostData } from '../wordpress-api/WordpressApi';    
  
 async function runCRUDExample() {
   const BASE_URL = 'https://dev.emeli.in.ua/wp-json';
