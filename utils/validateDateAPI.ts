@@ -1,9 +1,9 @@
 export function validateDate(date?: string): string | undefined {
     if (!date) return undefined;
-    const isoLike = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
+    const isoLike = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z?$/;
     if (!isoLike.test(date)) {
         throw new Error(
-            `Invalid WordPress date format: ${date}. Expected YYYY-MM-DDTHH:mm:ss`
+            `Invalid WordPress date format: ${date}. Expected YYYY-MM-DDTHH:mm:ss or ISO format (with optional milliseconds and timezone)`
         );
     }
     return date;
