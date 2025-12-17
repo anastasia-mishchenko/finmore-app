@@ -1,58 +1,19 @@
-import { test, expect, Logger, Page, BrowserContext } from '@playwright/test';
-import { TransactionsPage } from '../pages/TransactionsPage';
-import { NewTransactionModal } from '../pages/NewTransactionModal';
-import { DashboardPage } from '../pages/DashboardPage';
-import { LoginForm } from '../pages/LoginForm';
-import { RegistrationForm } from '../pages/RegistrationForm';
-import { faker } from '@faker-js/faker';
-import { registrationFormTerms } from '../test-data/registrationFormTerms';
 import { transactionsPageTerms } from '../test-data/transactionsPageTerms';
 import * as allure from "allure-js-commons";
-import { checkVisibility } from '../utils/globalMethods';
+import { test } from "../fixtures/pages.fixture";
+import { getUserId } from '../utils/globalMethods';
+import { seedTransactions, TransactionRecord, buildTransactionFromSeed } from "../utils/transactionStorage";
 
 test.describe("Transactions Page validation", () => {
-    let page: Page;
-    let context: BrowserContext;
-    let transactionsPage: TransactionsPage;
-    let newTransactionModal: NewTransactionModal;
-    let dashboardPage: DashboardPage;
-    let loginForm: LoginForm;
-    let registrationForm: RegistrationForm;
 
-    const randomDate = faker.date.recent().toISOString().slice(0, 10);
-    const email = faker.internet.email();
-    const password = faker.internet.password();
-    const fullname = faker.person.fullName();
+test.beforeEach(async ({page, dashboardPage, transactionsPage }) => {
+    await page.goto('/');
+    await dashboardPage.waitForDashboardReady();
+    await dashboardPage.navigateToTransactionsPage();
+    await transactionsPage.transactionsPageTitleIsVisible();
+  });
 
-    test.beforeAll(async ({ browser }) => {
-        await allure.displayName("Transactions Page validation");
-        context = await browser.newContext();
-        page = await context.newPage();
-
-        loginForm = new LoginForm(page);
-        registrationForm = new RegistrationForm(page);
-        dashboardPage = new DashboardPage(page);
-        transactionsPage = new TransactionsPage(page);
-        newTransactionModal = new NewTransactionModal(page);
-     
-        await loginForm.goto();
-        await loginForm.clickSwitchToRegistrationButton();
-        await registrationForm.fillRegistrationForm(
-          fullname,
-          email,
-          password,
-          password,
-          registrationFormTerms.currencyUAH
-        );
-     
-        //await loginForm.fillLoginForm(fakerEmail, fakerPassword);
-        await dashboardPage.userMenuIsVisible();
-        await dashboardPage.navigateToTransactionsPage();
-        await transactionsPage.transactionsPageTitleIsVisible();
-     
-      });
-
-test("[Positive] Add expense transaction", async()=>{
+test("[Positive] Add expense transaction", async({  transactionsPage, newTransactionModal }) => {
     await allure.displayName("Add expense transaction");
     await allure.description("This test verifies the ability to add an expense transaction");
     await allure.severity("critical");
@@ -79,7 +40,7 @@ test("[Positive] Add expense transaction", async()=>{
   })
 
 
-  test("[Positive] Add income transaction", async()=>{
+  test("[Positive] Add income transaction", async({ transactionsPage, newTransactionModal }) => {
     await allure.displayName("Add income transaction");
     await allure.description("This test verifies the ability to add an income transaction");
     await allure.severity("critical");
@@ -105,34 +66,41 @@ test("[Positive] Add expense transaction", async()=>{
 
   test.describe.serial("Transaction CRUD operations", () => {
     let createdTransactionId: string;
+    let userId: string;
+    let seedId: string;
+    let transactionValue: TransactionRecord[] = [];
 
-    test("[Positive] Add transaction for edit/delete flow", async() => {
-      await allure.displayName("Add transaction for edit/delete flow");
-      await allure.description("This test creates a transaction that will be edited and deleted in subsequent tests");
-      await allure.severity("critical");
+    test.beforeEach(async ({ page, dashboardPage, transactionsPage }) => {
+      userId = await getUserId();
+      seedId = Date.now().toString();
+      transactionValue = [
+        buildTransactionFromSeed(seedId, {
+          ...transactionsPageTerms.initialTransaction,
+          type: "expense",
+          tags: []
+        })
+      ];
 
-      await transactionsPage.clickAddTransactionButton();
-      await newTransactionModal.modalIsVisible();
-      await newTransactionModal.selectExpenseType();
-      await newTransactionModal.fillAmount(transactionsPageTerms.initialTransaction.amount);
-      await newTransactionModal.selectExpenseCategory(transactionsPageTerms.initialTransaction.category);
-      await newTransactionModal.fillDescription(transactionsPageTerms.initialTransaction.description);
-      await newTransactionModal.fillDate(transactionsPageTerms.initialTransaction.date);
-      await newTransactionModal.selectAccount(transactionsPageTerms.initialTransaction.account);
-      
-      await newTransactionModal.clickCreateButton();
-      await newTransactionModal.modalIsNotVisible();
-      
-      await allure.step("Verify transaction exists and get ID", async() => {
-        createdTransactionId = await transactionsPage.verifyTransactionExists(
-            transactionsPageTerms.initialTransaction.amount,
-            transactionsPageTerms.initialTransaction.category,
-            transactionsPageTerms.initialTransaction.description
-        );
-      });
+      await seedTransactions(transactionsPage.page, userId, transactionValue);
+      await transactionsPage.page.reload();
+      await dashboardPage.navigateToTransactionsPage();
+      await transactionsPage.transactionsPageTitleIsVisible();
+      createdTransactionId = seedId;
     });
 
-    test("[Positive] Edit transaction", async() => {
+    test("[Positive] Add transaction for CRUD flow using local storage ", async({ transactionsPage, newTransactionModal }) => {
+      await allure.displayName("Add transaction for CRUD flow using local storage");
+      await allure.description("This test creates a transaction that will be edited and deleted in subsequent tests using local storage");
+      await allure.severity("critical");
+
+      createdTransactionId = await transactionsPage.verifyTransactionExists(
+        `${transactionValue[0].amount}`,
+        transactionValue[0].category,
+        transactionValue[0].description
+      );
+    });
+
+    test("[Positive] Edit transaction", async({ transactionsPage, newTransactionModal }) => {
       await allure.displayName("Edit transaction");
       await allure.description("This test verifies the ability to edit a transaction created in the previous test");
       await allure.severity("critical");
@@ -155,7 +123,7 @@ test("[Positive] Add expense transaction", async()=>{
       });
     });
 
-    test("[Positive] Delete transaction", async() => {
+    test("[Positive] Delete transaction", async({ transactionsPage, newTransactionModal }) => {
       await allure.displayName("Delete transaction");
       await allure.description("This test verifies the ability to delete a transaction that was edited in the previous test");
       await allure.severity("critical");

@@ -63,6 +63,19 @@ export class DashboardPage {
          await checkVisibility(this.userMenu, 'User menu');
     }
 
+    async isUserLoggedIn(): Promise<boolean> {
+        try {
+            return await this.userMenu.isVisible({ timeout: 2000 });
+        } catch {
+            return false;
+        }
+    }
+
+    async waitForDashboardReady() {
+        await this.userMenuIsVisible();
+        await this.addTransactionButton.waitFor({ state: "visible", timeout: 10000 });
+    }
+
     async navigateToTransactionsPage(){
         await clickElement(this.navTransactions, 'Navigate to transactions page');
     }

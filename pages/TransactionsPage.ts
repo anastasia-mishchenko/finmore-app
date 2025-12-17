@@ -29,7 +29,7 @@ export class TransactionsPage{
         this.filterDateTo = page.getByTestId('date-to-filter');
         this.filterSearchByDescription = page.getByTestId('search-filter');
     }
-
+    
     async transactionsPageTitleIsVisible(){
         await checkVisibility(this.transactionsPageTitle, 'Transactions page title');
     }

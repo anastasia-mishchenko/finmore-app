@@ -1,9 +1,9 @@
-//import { test, expect } from "@playwright/test";
-import { LoginForm } from "../pages/LoginForm";
 import { loginFormTerms } from "../test-data/loginTerms";
-import { RegistrationForm } from "../pages/RegistrationForm";
 import * as allure from "allure-js-commons";
 import { test, expect} from "../fixtures/pages.fixture";
+
+// Force blank storage so login tests start logged out
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe("Login Form validation", () => {
 

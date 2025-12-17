@@ -1,10 +1,11 @@
 import { expect, Locator } from "@playwright/test";
+import fs from 'fs';
 
 export async function clickElement (locator : Locator, name : string) {
    try {
     console.log(`CLICK: ${name}`);
-    //wait for locator to be visible
-    await locator.waitFor({ state: "visible" });
+    //wait for locator to be visible (allow slower renders)
+    await locator.waitFor({ state: "visible", timeout: 5000 });
     await locator.click({ trial: true });
     await locator.click();
     console.log(`CLICK SUCCESS: ${name}`);
@@ -28,7 +29,7 @@ try {
 export async function checkVisibility (locator : Locator, name : string){
 try {
     console.log(`CHECK VISIBLE: ${name}`);
-    await locator.waitFor({ state: "visible" });
+    await locator.waitFor({ state: "visible", timeout: 10000 });
     await expect(locator).toBeVisible();
     console.log(`VISIBLE OK: ${name}`);
   } catch (error) {
@@ -106,6 +107,26 @@ export async function verifyTextContent (locator : Locator, value : string, name
     }
   }
 
+  export async function getUserId() {
+    try {
+      const state = JSON.parse(fs.readFileSync('storage/auth.json', 'utf8'));
+      const entries = state.origins
+        .flatMap((o: any) => o.localStorage.map((e: any) => ({ origin: o.origin, ...e })));
+
+      const explicitUserId = entries.find((e: any) => e.name === 'userId')?.value;
+      if (explicitUserId) return explicitUserId;
+
+      const currentUserEntry = entries.find((e: any) => e.name === 'currentUser')?.value;
+      if (currentUserEntry) {
+        const parsed = JSON.parse(currentUserEntry);
+        if (parsed?.id) return parsed.id;
+      }
+
+      throw new Error('userId not found in storage/auth.json');
+    } catch (error) {
+      throw new Error(`GET USER ID FAILED: ${error}`);
+    }
+  }
 
 
  

@@ -25,7 +25,10 @@ export const test = base.extend<Pages>({
     },
     transactionsPage: async ({ page }, use) => {
         await use(new TransactionsPage(page));
-    }
+    },
+    newTransactionModal: async ({ page }, use) => {
+        await use(new NewTransactionModal(page));
+    },
 });
 
 export { expect };

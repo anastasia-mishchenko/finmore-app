@@ -12,5 +12,6 @@ allure-report/
 playwright/.cache/
 .playwright-mcp/
 .cursor/
+storage/
 assets/
 
