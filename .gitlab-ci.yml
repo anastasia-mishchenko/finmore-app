@@ -3,9 +3,9 @@ image: mcr.microsoft.com/playwright:v1.57.0-jammy
 stages:
   - test
   - report
+  - pages
  
 variables:
-  NODE_ENV: test
   CI: "true"
   ALLURE_RESULTS_DIR: allure-results
   ALLURE_REPORT_DIR: allure-report
@@ -21,6 +21,7 @@ playwright_tests:
     - npm ci
     - npx playwright install --with-deps
     - npx playwright test
+
   artifacts:
     when: always
     paths:
@@ -28,15 +29,69 @@ playwright_tests:
       - allure-results/
     expire_in: 7 days
 
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" = "failed" ]; then
+        curl -X POST -H 'Content-type: application/json' \
+        --data "{
+          \"channel\": \"$SLACK_CHANNEL\",
+          \"text\": \" *Playwright tests FAILED*\\nProject: *$CI_PROJECT_NAME*\\nBranch: *$CI_COMMIT_REF_NAME*\\nPipeline: <$CI_PIPELINE_URL|Open pipeline>\"
+        }" $SLACK_WEBHOOK_URL
+
+ 
+
+
 allure_report:
   stage: report
   image: frankescobar/allure-docker-service
+
   dependencies:
     - playwright_tests
   script:
     - allure generate allure-results --clean -o allure-report
+
   artifacts:
     when: always
     paths:
       - allure-report/
     expire_in: 14 days
+ 
+
+
+pages:
+  stage: pages
+  dependencies:
+    - allure_report
+
+  script:
+
+    - mkdir -p public
+    - cp -r allure-report/* public/
+
+  artifacts:
+
+    paths:
+
+      - public
+
+  only:
+
+    - master
+
+    - main
+
+  after_script:
+
+    - |
+
+      curl -X POST -H 'Content-type: application/json' \
+
+      --data "{
+
+        \"channel\": \"$SLACK_CHANNEL\",
+
+        \"text\": \" *Allure report is ready!*\\nProject: *$CI_PROJECT_NAME*\\nBranch: *$CI_COMMIT_REF_NAME*\\n Report: https://$CI_PROJECT_NAMESPACE.gitlab.io/$CI_PROJECT_NAME/\"
+
+      }" $SLACK_WEBHOOK_URL
+
+ 

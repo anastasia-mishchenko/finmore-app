@@ -10,7 +10,7 @@ const PASSWORD = process.env.WP_PASSWORD || apiTestTerms.defaultPassword;
  
 let wpApi: WordPressAPI;
 let createdPostId: number;
- 
+ //comment
 test.describe.serial('WordPress REST API CRUD Operations', () => {
   test.beforeAll(async () => {
     wpApi = new WordPressAPI(BASE_URL, USERNAME, PASSWORD);
