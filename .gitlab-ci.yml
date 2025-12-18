@@ -27,7 +27,7 @@ playwright_tests:
       - playwright-report/
       - allure-results/
     expire_in: 7 days
- 
+ <!-- Generate Allure report -->
 allure_report:
   stage: report
   image: frankescobar/allure-docker-service
