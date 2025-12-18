@@ -31,7 +31,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     actionTimeout: 1000,
-    headless: false,
+    headless: true,
     /* Base URL to use in actions like `await page.goto('/')`. */
      baseURL: 'https://finmore.netlify.app/',
      storageState: 'storage/auth.json',
