@@ -1,0 +1,42 @@
+image: mcr.microsoft.com/playwright:v1.42.1-jammy
+ 
+stages:
+  - test
+  - report
+ 
+variables:
+  NODE_ENV: test
+  CI: "true"
+  ALLURE_RESULTS_DIR: allure-results
+  ALLURE_REPORT_DIR: allure-report
+ 
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+ 
+playwright_tests:
+  stage: test
+  script:
+    - npm ci
+    - npx playwright install --with-deps
+    - npx playwright test
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - allure-results/
+    expire_in: 7 days
+ 
+allure_report:
+  stage: report
+  image: frankescobar/allure-docker-service
+  dependencies:
+    - playwright_tests
+  script:
+    - allure generate allure-results --clean -o allure-report
+  artifacts:
+    when: always
+    paths:
+      - allure-report/
+    expire_in: 14 days
