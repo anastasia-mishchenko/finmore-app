@@ -13,7 +13,6 @@ jobs:
         inputs:
           targetType: 'inline'
           script: 'npm ci'
-          workingDirectory: tests/ # update accordingly
 
       # 3. Створити папку для звітів (щоб PublishPipelineArtifact не падав)
       - script: mkdir -p playwright-report
@@ -24,13 +23,24 @@ jobs:
         displayName: "Run Playwright Test"
         env:
           PLAYWRIGHT_SERVICE_URL: $(PLAYWRIGHT_SERVICE_URL)
-          PLAYWRIGHT_SERVICE_RUN_ID: $(Build.DefinitionName)-$(Build.BuildNumber)-$(System.JobAttempt)
+          PLAYWRIGHT_SERVICE_RUN_ID: $(Build.BuildId)-$(System.JobAttempt)
         inputs:
           azureSubscription: 'playwrightTest'
           scriptType: 'pscore'
           scriptLocation: 'inlineScript'
           inlineScript: |
-            npx playwright test --config=playwright.service.config.ts --reporter=html --output=playwright-report
+            Write-Host "=== Playwright Workspace Configuration ==="
+            Write-Host "PLAYWRIGHT_SERVICE_URL: $env:PLAYWRIGHT_SERVICE_URL"
+            Write-Host "PLAYWRIGHT_SERVICE_RUN_ID: $env:PLAYWRIGHT_SERVICE_RUN_ID"
+            Write-Host "Azure Subscription: playwrightTest"
+            if (-not $env:PLAYWRIGHT_SERVICE_URL) {
+              Write-Error "PLAYWRIGHT_SERVICE_URL environment variable is not set!"
+              exit 1
+            }
+            # Enable verbose logging for Playwright
+            $env:DEBUG = "pw:api"
+            # Run tests with verbose output
+            npx playwright test --config=playwright.service.config.ts --reporter=html --output=playwright-report --reporter=list
           addSpnToEnvironment: true
 
       # 5. Публікація артефактів
