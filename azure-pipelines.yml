@@ -37,6 +37,8 @@ jobs:
               Write-Error "PLAYWRIGHT_SERVICE_URL environment variable is not set!"
               exit 1
             }
+            # Add the DEBUG flag to your test command
+            DEBUG=pw:browser* npx playwright test --config=playwright.service.config.ts
             # Enable verbose logging for Playwright
             $env:DEBUG = "pw:api"
             # Run tests
