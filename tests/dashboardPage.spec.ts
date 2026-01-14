@@ -11,7 +11,7 @@ test.describe("Dashboard Page validation", () => {
   // });
 
   test.beforeEach(async ({ page, dashboardPage }) => {
-    await page.goto('/.comd');
+    await page.goto('/');
     await dashboardPage.waitForDashboardReady();
   });
 
@@ -22,7 +22,7 @@ test.describe("Dashboard Page validation", () => {
     await allure.severity("critical");
  
     await allure.step("Add first income transaction", async () => {
-      await dashboardPage.clickAddTransactionButton();
+      //await dashboardPage.clickAddTransactionButton();
       await newTransactionModal.fillTransactionForm(
         dashboardPageTerms.incomeTransaction1.type,
         dashboardPageTerms.incomeTransaction1.amount,

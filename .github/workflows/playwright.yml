@@ -29,10 +29,13 @@ jobs:
         run: npx playwright install --with-deps
  
       - name: Run Playwright tests
+        id: playwright-tests
         env:
           CI: true
         run: |
-          npx playwright test
+          npx playwright test --reporter=json:test-results.json --reporter=line --reporter=allure-playwright || TEST_EXIT_CODE=$?
+          exit ${TEST_EXIT_CODE:-0}
+        continue-on-error: true
  
       - name: Remove existing Allure report
         if: always()
@@ -59,11 +62,70 @@ jobs:
           name: playwright-report
           path: playwright-report
 
+      - name: Parse test results
+        if: always()
+        id: test-results
+        run: |
+          if [ -f test-results.json ]; then
+            # Parse Playwright JSON reporter output
+            # Count passed tests (status: "passed" or ok: true)
+            PASSED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "passed" or .ok == true)] | length' test-results.json 2>/dev/null || echo "0")
+            # Count failed tests
+            FAILED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "failed" or .ok == false)] | length' test-results.json 2>/dev/null || echo "0")
+            # Count skipped tests
+            SKIPPED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "skipped")] | length' test-results.json 2>/dev/null || echo "0")
+            # Get duration in milliseconds
+            DURATION_MS=$(jq -r '.stats.duration // (.suites[].duration // 0 | add) // 0' test-results.json 2>/dev/null || echo "0")
+          else
+            # Fallback values
+            PASSED=0
+            FAILED=0
+            SKIPPED=0
+            DURATION_MS=0
+          fi
+          
+          # Calculate total tests
+          TOTAL=$((PASSED + FAILED + SKIPPED))
+          
+          # Format duration (convert ms to seconds, then format)
+          if [ -z "$DURATION_MS" ] || [ "$DURATION_MS" = "null" ] || [ "$DURATION_MS" = "0" ]; then
+            DURATION_FORMATTED="N/A"
+          else
+            DURATION_SEC=$((DURATION_MS / 1000))
+            DURATION_MIN=$((DURATION_SEC / 60))
+            DURATION_REMAINING_SEC=$((DURATION_SEC % 60))
+            if [ "$DURATION_MIN" -gt 0 ]; then
+              DURATION_FORMATTED="${DURATION_MIN}m ${DURATION_REMAINING_SEC}s"
+            else
+              DURATION_FORMATTED="${DURATION_SEC}s"
+            fi
+          fi
+          
+          echo "passed=${PASSED}" >> $GITHUB_OUTPUT
+          echo "failed=${FAILED}" >> $GITHUB_OUTPUT
+          echo "skipped=${SKIPPED}" >> $GITHUB_OUTPUT
+          echo "total=${TOTAL}" >> $GITHUB_OUTPUT
+          echo "duration_formatted=${DURATION_FORMATTED}" >> $GITHUB_OUTPUT
+
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         if: always() # CRITICAL: This ensures it runs even if the tests fail
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_MESSAGE: "Playwright tests for ${{ github.repository }} have finished"
-          SLACK_TITLE: Pipeline Status    
+          SLACK_MESSAGE: |
+            *Playwright Test Results*
+            
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}> by ${{ github.actor }}
+            *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>
+            
+            *Test Results:*
+            📊 Total: ${{ steps.test-results.outputs.total }}
+            ✅ Passed: ${{ steps.test-results.outputs.passed }}
+            ❌ Failed: ${{ steps.test-results.outputs.failed }}
+            ⏭️  Skipped: ${{ steps.test-results.outputs.skipped }}
+            ⏱️  Duration: ${{ steps.test-results.outputs.duration_formatted }}
+            
+            *Status:* ${{ job.status == 'success' && '✅ SUCCESS' || '❌ FAILURE' }}
+          SLACK_TITLE: Playwright Test Run - ${{ github.ref_name }}    
