@@ -33,8 +33,9 @@ jobs:
         env:
           CI: true
         run: |
-          npx playwright test --reporter=json:test-results.json --reporter=line --reporter=allure-playwright || TEST_EXIT_CODE=$?
-          exit ${TEST_EXIT_CODE:-0}
+          npx playwright test --reporter=json:test-results.json --reporter=line --reporter=allure-playwright 2>&1 | tee test-output.txt
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+          exit $TEST_EXIT_CODE
         continue-on-error: true
  
       - name: Remove existing Allure report
@@ -66,31 +67,55 @@ jobs:
         if: always()
         id: test-results
         run: |
+          PASSED=0
+          FAILED=0
+          SKIPPED=0
+          DURATION_MS=0
+          
+          # Method 1: Parse from JSON file (most accurate)
           if [ -f test-results.json ]; then
-            # Parse Playwright JSON reporter output
-            # Count passed tests (status: "passed" or ok: true)
-            PASSED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "passed" or .ok == true)] | length' test-results.json 2>/dev/null || echo "0")
-            # Count failed tests
-            FAILED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "failed" or .ok == false)] | length' test-results.json 2>/dev/null || echo "0")
-            # Count skipped tests
-            SKIPPED=$(jq -r '[.suites[]?.specs[]?.tests[]? | select(.status == "skipped")] | length' test-results.json 2>/dev/null || echo "0")
-            # Get duration in milliseconds
-            DURATION_MS=$(jq -r '.stats.duration // (.suites[].duration // 0 | add) // 0' test-results.json 2>/dev/null || echo "0")
-          else
-            # Fallback values
-            PASSED=0
-            FAILED=0
-            SKIPPED=0
-            DURATION_MS=0
+            # Count tests by status - traverse suites -> specs -> tests
+            PASSED=$(jq -r '[.suites[].specs[].tests[]? | select(.status == "passed")] | length' test-results.json 2>/dev/null || echo "0")
+            FAILED=$(jq -r '[.suites[].specs[].tests[]? | select(.status == "failed")] | length' test-results.json 2>/dev/null || echo "0")
+            SKIPPED=$(jq -r '[.suites[].specs[].tests[]? | select(.status == "skipped")] | length' test-results.json 2>/dev/null || echo "0")
+            DURATION_MS=$(jq -r '.stats.duration // 0' test-results.json 2>/dev/null || echo "0")
           fi
           
-          # Calculate total tests
+          # Method 2: Parse from console output (reliable fallback)
+          if [ -f test-output.txt ] && ([ "$PASSED" = "0" ] || [ -z "$PASSED" ]); then
+            # Playwright's line reporter shows: "X passed" or "X passed, Y failed" at the end
+            # Look for lines with test counts
+            if [ "$PASSED" = "0" ] && [ "$FAILED" = "0" ]; then
+              # Try to find summary lines - Playwright prints them at the end
+              PASSED=$(grep -oE '^\s*[0-9]+\s+passed' test-output.txt | tail -1 | grep -oE '[0-9]+' || echo "0")
+              FAILED=$(grep -oE '^\s*[0-9]+\s+failed' test-output.txt | tail -1 | grep -oE '[0-9]+' || echo "0")
+              SKIPPED=$(grep -oE '^\s*[0-9]+\s+skipped' test-output.txt | tail -1 | grep -oE '[0-9]+' || echo "0")
+              
+              # Alternative: look for combined summary line like "5 passed (30s)"
+              if [ "$PASSED" = "0" ] && [ "$FAILED" = "0" ]; then
+                SUMMARY=$(grep -E '[0-9]+\s+passed' test-output.txt | tail -1 || echo "")
+                if [ -n "$SUMMARY" ]; then
+                  PASSED=$(echo "$SUMMARY" | grep -oE '[0-9]+' | head -1 || echo "0")
+                fi
+                SUMMARY=$(grep -E '[0-9]+\s+failed' test-output.txt | tail -1 || echo "")
+                if [ -n "$SUMMARY" ]; then
+                  FAILED=$(echo "$SUMMARY" | grep -oE '[0-9]+' | head -1 || echo "0")
+                fi
+              fi
+            fi
+          fi
+          
+          # Ensure valid integers (default to 0 if empty)
+          PASSED=$((PASSED + 0))
+          FAILED=$((FAILED + 0))
+          SKIPPED=$((SKIPPED + 0))
+          DURATION_MS=$((DURATION_MS + 0))
+          
+          # Calculate total
           TOTAL=$((PASSED + FAILED + SKIPPED))
           
-          # Format duration (convert ms to seconds, then format)
-          if [ -z "$DURATION_MS" ] || [ "$DURATION_MS" = "null" ] || [ "$DURATION_MS" = "0" ]; then
-            DURATION_FORMATTED="N/A"
-          else
+          # Format duration
+          if [ "$DURATION_MS" -gt 0 ]; then
             DURATION_SEC=$((DURATION_MS / 1000))
             DURATION_MIN=$((DURATION_SEC / 60))
             DURATION_REMAINING_SEC=$((DURATION_SEC % 60))
@@ -99,7 +124,11 @@ jobs:
             else
               DURATION_FORMATTED="${DURATION_SEC}s"
             fi
+          else
+            DURATION_FORMATTED="N/A"
           fi
+          
+          echo "Test Results: Passed=${PASSED}, Failed=${FAILED}, Skipped=${SKIPPED}, Total=${TOTAL}"
           
           echo "passed=${PASSED}" >> $GITHUB_OUTPUT
           echo "failed=${FAILED}" >> $GITHUB_OUTPUT
