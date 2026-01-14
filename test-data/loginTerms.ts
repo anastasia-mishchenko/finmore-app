@@ -12,5 +12,8 @@ export const loginFormTerms = {
     emailError : "Email обов'язковий",
     passwordError : "Пароль обов'язковий",
     invalidCredentialsError : "Невірний email або пароль",
+
+    validEmail : "test@test.com",
+    validPassword : "123456"
 }
 

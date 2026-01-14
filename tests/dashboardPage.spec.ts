@@ -6,6 +6,10 @@ import { test } from "../fixtures/pages.fixture";
 
 test.describe("Dashboard Page validation", () => {
   
+  // test.beforeEach(async ({ authorizationPage }) => {
+  //   await authorizationPage.waitForDashboardReady();
+  // });
+
   test.beforeEach(async ({ page, dashboardPage }) => {
     await page.goto('/');
     await dashboardPage.waitForDashboardReady();
