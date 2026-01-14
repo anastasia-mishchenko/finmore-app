@@ -22,7 +22,7 @@ test.describe("Dashboard Page validation", () => {
     await allure.severity("critical");
  
     await allure.step("Add first income transaction", async () => {
-      //await dashboardPage.clickAddTransactionButton();
+      await dashboardPage.clickAddTransactionButton();
       await newTransactionModal.fillTransactionForm(
         dashboardPageTerms.incomeTransaction1.type,
         dashboardPageTerms.incomeTransaction1.amount,
