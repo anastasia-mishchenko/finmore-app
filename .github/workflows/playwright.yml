@@ -64,5 +64,6 @@ jobs:
         if: always() # CRITICAL: This ensures it runs even if the tests fail
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: ${{ job.status }}
           SLACK_MESSAGE: "Playwright tests for ${{ github.repository }} have finished"
           SLACK_TITLE: Pipeline Status    

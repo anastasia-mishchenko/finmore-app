@@ -11,7 +11,7 @@ test.describe("Dashboard Page validation", () => {
   // });
 
   test.beforeEach(async ({ page, dashboardPage }) => {
-    await page.goto('/');
+    await page.goto('/.comd');
     await dashboardPage.waitForDashboardReady();
   });
 
