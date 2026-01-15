@@ -49,6 +49,18 @@ export async function verifyInputIsInvalid (locator : Locator, name : string) {
   }
 }
 
+export async function getInputValidationState(locator : Locator, name : string): Promise<boolean> {
+  try{
+    console.log(`GET INPUT VALIDATION STATE: ${name}`);
+    const isValid = await locator.evaluate((el) => (el as any).validity.valid);
+    console.log(`INPUT VALIDATION STATE: ${name} isValid=${isValid}`);
+    return isValid;
+  }
+  catch (error) {
+    throw new Error(`GET INPUT VALIDATION STATE FAILED: ${name}\n${error}`);
+  }
+}
+
 export async function verifyInputValidationMessage (locator : Locator, name : string) {
   try {
     console.log(`CHECK VALIDATION MESSAGE: ${name}`);
