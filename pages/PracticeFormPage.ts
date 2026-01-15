@@ -134,8 +134,7 @@ export class PracticeFormPage {
   // Date of birth
   async fillDateOfBirth(date: Date): Promise<void> {
     const formattedDate = this.formatDate(date);
-    await this.dateOfBirthInput.click();
-    await this.page.keyboard.press("Meta+A");
+    await this.dateOfBirthInput.click({ clickCount: 3 });
     await this.page.keyboard.type(formattedDate);
     await this.page.keyboard.press("Escape");
     await expect(this.dateOfBirthInput).toHaveValue(formattedDate);
